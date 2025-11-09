@@ -39,7 +39,6 @@ class RegisterView(generics.CreateAPIView):
 class LoginView(generics.GenericAPIView):
     serializer_class = CustomUserLoginSerializer
     permission_classes = [AllowAny]
-    logging.basicConfig(level=logging.INFO)
     
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -48,7 +47,7 @@ class LoginView(generics.GenericAPIView):
 
         # Generate JWT token
         tokens = user.tokens()  # to create tokens method in model
-        logging.info(f"Generating tokens for user {user.id}")
+        # logging.info(f"Generating tokens for user {user.id}")
         
         return Response({
             "message": "Login successful",
@@ -86,7 +85,7 @@ class ForgotPasswordView(generics.GenericAPIView):
             pass
         return Response({"message": "If the email exists, a password reset link has been sent."}, status=status.HTTP_200_OK)
 
-# password reset view
+# password reset view # remove this view
 class ResetPasswordView(generics.GenericAPIView):
     serializer_class = ResetPasswordSerializer
     permission_classes = [IsAuthenticated]

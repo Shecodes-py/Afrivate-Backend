@@ -11,19 +11,14 @@ class CustomUser(AbstractUser):
     )
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=False)
-    bio = models.TextField(blank=True, null=True)
-    # profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
 
     # Field to store the OTP secret key
     otp_secret_key = models.CharField(max_length=32, null=True, blank=True)
-
-    # USERNAME_FIELD = 'email_or_username' # i cant do this in abstract user
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username','role']
 
     def tokens(self):
         refresh = RefreshToken.for_user(self)
-
         # attach custom claims
         refresh['role'] = self.role
         refresh['email'] = self.email

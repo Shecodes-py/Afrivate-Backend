@@ -38,25 +38,37 @@ class CustomUserRegistrationSerializer(serializers.ModelSerializer):
         return value
 
 class CustomUserLoginSerializer(serializers.Serializer):
-    username_or_email = serializers.CharField()
+    email_or_username = serializers.CharField()
     password = serializers.CharField(
         style ={'input_type': 'password'}, write_only=True)
     
     def validate(self, data):
-        username_or_email = data.get('username_or_email')
+        email_or_username = data.get('email_or_username')
         password = data.get('password')
-        
+
+        # logging.info(f"Attempting login for: {email_or_username}")
+        if not email_or_username or not password:
+            # logging.warning("Email/Username or password not provided for authentication")
+            raise serializers.ValidationError(
+                {"error": "Email/Username and password are required"}, 
+                code='authorization'
+            )
+            
         # try with email first
-        user = authenticate(email=username_or_email, password=password) # can use both username/email to login
+        user = authenticate(email=email_or_username, password=password) # can use both username/email to login
         if not user:
             # try with username
-            user = authenticate(username=username_or_email, password=password)
+            user = authenticate(request=self.context.get('request'),
+                                email_or_username=email_or_username, 
+                                password=password)
             
         if not user:
+            # logging.warning(f"Authentication failed for: {email_or_username}")
             raise serializers.ValidationError(
                 {"error": "Invalid email or password"}, code=status.HTTP_401_UNAUTHORIZED)
-        
+
         # Store user in context for use in the view
+        logging.info(f"User authenticated successfully: {user.username}")
         data['user'] = user
         return data
     
